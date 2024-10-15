@@ -1,0 +1,26 @@
+#Python-related
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+
+#Environment variable files
+.env
+
+#Django-related
+*.log
+db.sqlite3
+media/
+
+#Virtual environment folders (e.g., venv)
+venv/
+env/
+
+#IDE-related
+.idea/
+.vscode/
+#OS-related
+.DS_Store
+Thumbs.db
+
+migrations/
