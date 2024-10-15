@@ -1,7 +1,6 @@
 # Gachi-backend
 
-This project is initial setup of the Gachi project backend. The following instructions will guide you through setting up the Django development environment and configuring it with Supabase.
-
+This project is the initial setup of the Gachi project backend. The following instructions will guide you through setting up the Django development environment, configuring it with **Supabase**, and integrating **Django REST Framework** to enable communication with the **Next.js frontend**.
 ## Requirements
 - Python Version 3.11.10
 - pip
