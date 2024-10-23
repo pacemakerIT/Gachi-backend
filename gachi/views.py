@@ -14,7 +14,23 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 
 @api_view(['GET'])
 def test_supabase_connection(request):
-    # Fetch all rows from a specific table
-    response = supabase.table('Test').select('*').execute()
-    data = response.data  # Get data from the response
-    return JsonResponse(data, safe=False)  # Return data as JSON response
+    # Get data from Program table
+    response_program = supabase.table('Program').select('*').execute()
+    programs = response_program.data
+
+    # Get Mentors data from User table
+    # Todo: get mentor data
+    response_user = supabase.table('User').select('*').execute()
+    users = response_user.data
+
+    # Get data from Review table
+    response_review = supabase.table('Review').select('*').execute()
+    reviews = response_review.data
+
+    response = {
+        'programs':programs,
+        'users': users,
+        'reviews': reviews,
+    }
+
+    return JsonResponse(response, safe=False)
