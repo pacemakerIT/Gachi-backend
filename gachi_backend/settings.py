@@ -63,6 +63,9 @@ MIDDLEWARE = [
 
 #Allowing CORS requests from all origins is recommended only in a development environment.
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Next.js 프론트엔드의 URL
+]
 
 ROOT_URLCONF = "gachi_backend.urls"
 
