@@ -1,17 +1,9 @@
 import requests
 from django.conf import settings
-from django.utils.text import slugify
+from .supabase_config import supabase_url, headers
 
 
-def fetch_supabase_data():
-    # Get Supabase API URL and key
-    supabase_url = settings.SUPABASE_URL
-    supabase_key = settings.SUPABASE_API_KEY
-    headers = {
-        'apikey': supabase_key,
-        'Authorization': f'Bearer {supabase_key}',
-        'Content-Type': 'application/json'
-    }
+def fetch_supabase_program_data():
     
     # Importing Program, User, and ProgramParticipants data from Supabase
     program_response = requests.get(f'{supabase_url}/rest/v1/Program', headers=headers)
@@ -30,7 +22,7 @@ def fetch_supabase_data():
             # 
             program_id = program['programId']
             title = program['title']
-            coast = program['cost']
+            cost = program['cost']
             status = program['status']
             thumbnail_url = program.get('thumbnailUrl', '')  
 
@@ -49,11 +41,10 @@ def fetch_supabase_data():
             combined_data.append({
                 'programId': program_id,
                 'title': title,
-                'coast': coast,
+                'cost': cost,
                 'status': status,
                 'hostName': host_name,
                 'thumbnailUrl': thumbnail_url, 
-                'slug': slugify(title)
             })
         
         # Sort program data by status
