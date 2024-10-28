@@ -15,16 +15,15 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 @api_view(['GET'])
 def test_supabase_connection(request):
     # Get data from Program table
-    response_program = supabase.table('Program').select('*').execute()
+    response_program = supabase.table('Program').select('*').order('status').execute()
     programs = response_program.data
 
     # Get Mentors data from User table
-    # Todo: get mentor data
-    response_user = supabase.table('User').select('*').execute()
+    response_user = supabase.table('User').select('*, Industry!inner(*)').eq('userTypeId', '74ae0cb7-e4bf-472e-a8a3-e94d895028e5').execute()
     users = response_user.data
 
     # Get data from Review table
-    response_review = supabase.table('Review').select('*').execute()
+    response_review = supabase.table('Review').select("*, User!inner(*, Industry!inner(title))").execute()
     reviews = response_review.data
 
     response = {
