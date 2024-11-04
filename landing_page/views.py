@@ -10,8 +10,6 @@ SUPABASE_API_KEY = settings.SUPABASE_API_KEY
 # Initialize Supabase client
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 
-# Test view to fetch data from Supabase
-
 @api_view(['GET'])
 def landing_page_supabase_connection(request):
     # Get data from Program table
