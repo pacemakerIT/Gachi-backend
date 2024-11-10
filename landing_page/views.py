@@ -15,11 +15,11 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 @api_view(['GET'])
 def landing_page_supabase_connection(request):
     # Get data from Program table
-    response_program = supabase.table('Program').select('*').order('status').execute()
+    response_program = supabase.table('Program').select('title, cost, programId, thumbnailUrl, status').order('status').execute()
     programs = response_program.data
 
     # Get Mentors data from User table
-    response_mentor = supabase.table('User').select('*, Industry!inner(*)').eq('userTypeId', '74ae0cb7-e4bf-472e-a8a3-e94d895028e5').execute()
+    response_mentor = supabase.table('User').select('photoUrl, firstName, lastName, userId, Industry!inner(title)').eq('userTypeId', '74ae0cb7-e4bf-472e-a8a3-e94d895028e5').execute()
     mentors = response_mentor.data
 
     flattened_mentors = []
@@ -34,7 +34,7 @@ def landing_page_supabase_connection(request):
         flattened_mentors.append(flattened_mentor)
 
     # Get data from Review table
-    response_review = supabase.table('Review').select("*, User!inner(*, Industry!inner(title))").execute()
+    response_review = supabase.table('Review').select("reviewId, content, User!inner(photoUrl, firstName, lastName, Industry!inner(title))").execute()
     reviews = response_review.data
 
     flattened_reviews = []
