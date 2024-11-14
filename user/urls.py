@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import signup
-from .views import login
+from .views import signup, login
 
 urlpatterns = [
     path('login/', login, name='login_supabase'),
