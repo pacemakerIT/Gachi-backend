@@ -21,4 +21,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('gachi/', include('gachi.urls')),
     path('', include('landig_page.urls')), 
+    path('', include('dashboard.urls'))
 ]
