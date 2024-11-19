@@ -63,6 +63,9 @@ MIDDLEWARE = [
 
 #Allowing CORS requests from all origins is recommended only in a development environment.
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Next.js 프론트엔드의 URL
+]
 
 ROOT_URLCONF = "gachi_backend.urls"
 
@@ -90,8 +93,12 @@ WSGI_APPLICATION = "gachi_backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",       
+        "USER": "postgres.wypnfvytxxfvyxnuicnn",        
+        "PASSWORD": "Gachi2024db",
+        "HOST": "aws-0-ca-central-1.pooler.supabase.com",          
+        "PORT": "6543",                     
     }
 }
 
