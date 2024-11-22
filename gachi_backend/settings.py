@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# Import dj-database-url at the beginning of the file.
+import dj_database_url
+
 # Load .env file
 load_dotenv()
 
@@ -94,11 +97,11 @@ WSGI_APPLICATION = "gachi_backend.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",       
-        "USER": "postgres.wypnfvytxxfvyxnuicnn",        
-        "PASSWORD": "Gachi2024db",
-        "HOST": "aws-0-ca-central-1.pooler.supabase.com",          
-        "PORT": "6543",                     
+        "NAME": os.environ.get("DATABASE_NAME"),
+        "USER": os.environ.get("DATABASE_USER"),
+        "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+        "HOST": os.environ.get("DATABASE_HOST"),
+        "PORT": os.environ.get("DATABASE_PORT", "5432"),
     }
 }
 
