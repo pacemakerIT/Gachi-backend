@@ -1,8 +1,8 @@
 databases:
   - name: gachi-backend-db
     plan: free
-    databaseName: postgres
-    user: postgres.wypnfvytxxfvyxnuicnn
+    databaseName: gachi_backend_db
+    user: gachi_backend_user
 
 services:
   - type: web
