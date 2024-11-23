@@ -225,12 +225,7 @@ def dashboard_api_design(request):
             "new_sessions": monthly_data_dict[month.strftime("%Y-%m")]["new_sessions"],
         }
         for month in inflow_months
-    ]
-    
-    print("Program Data:", list(Program.objects.all().values()))
-    print("Participants Data:", list(Programparticipants.objects.all().values()))
-
-    
+    ]    
     # 1. 매월 매출 (총 프로그램 판매 수익)
     monthly_sales = (
         Programparticipants.objects
@@ -240,9 +235,6 @@ def dashboard_api_design(request):
         .annotate(total_sales=Sum('programid__cost'))  # 프로그램의 비용 합산
         .order_by('month')
     )
-    
-    print("Monthly Sales Data:", list(monthly_sales))
-
     # 2. 매월 무료 프로그램 참여 횟수
     monthly_free_participation = (
         Programparticipants.objects
@@ -252,9 +244,6 @@ def dashboard_api_design(request):
         .annotate(free_count=Count('programid'))  # 참여 횟수 집계
         .order_by('month')
     )
-
-    print("Monthly Free Participation:", list(monthly_free_participation))
-
     # 데이터를 효율적으로 매칭하기 위해 dict 변환
     sales_dict = {item['month']: item['total_sales'] for item in monthly_sales}
     free_participation_dict = {item['month']: item['free_count'] for item in monthly_free_participation}
@@ -279,8 +268,6 @@ def dashboard_api_design(request):
             "companyProfit": company_profit,
             "freeParticipationCount": free_count
         })
-
-    print("Monthly Sales Data (Final):", monthly_sales_data)
     
     # 최종 응답 데이터 포맷
     data = {
@@ -295,4 +282,4 @@ def dashboard_api_design(request):
         "monthlySalesData": monthly_sales_data,
     }
 
-    return JsonResponse(data) # views.py
+    return JsonResponse(data) 
