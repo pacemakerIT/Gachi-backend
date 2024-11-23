@@ -24,3 +24,6 @@ env/
 Thumbs.db
 
 migrations/
+
+# Ignore staticfiles directory
+staticfiles/

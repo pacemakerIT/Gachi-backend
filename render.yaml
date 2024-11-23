@@ -1,0 +1,25 @@
+databases:
+  - name: gachi-backend-db
+    plan: free
+    databaseName: gachi_backend_db
+    user: gachi_backend_user
+
+services:
+  - type: web
+    name: gachi-backend
+    runtime: python
+    buildCommand:
+      - pip install -r requirements.txt
+      - python manage.py collectstatic --noinput
+    startCommand: python -m gunicorn gachi_backend.asgi:application -k uvicorn.workers.UvicornWorker
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        value: django-insecure-app)g)+)c9+&68ti2x_3k7^i1)b8l%jhn9^zrv@!1-%-=@=h
+      - key: SUPABASE_URL
+        value: https://wypnfvytxxfvyxnuicnn.supabase.co/
+      - key: SUPABASE_API_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5cG5mdnl0eHhmdnl4bnVpY25uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyODc0OTg5MCwiZXhwIjoyMDQ0MzI1ODkwfQ.AjicoD9OXG3yQ8Njrks_E0E43ZKW9zaHJCbETyqt-Mc
+      - key: DATABASE_URL
+        value: postgresql://gachi_backend_user:Gachi2024db@aws-0-ca-central-1.pooler.supabase.com:6543/gachi_backend_db
+      - key: WEB_CONCURRENCY
+        value: 4
