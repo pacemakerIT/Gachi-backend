@@ -40,7 +40,7 @@ class Industry(models.Model):
 
 
 class Mentormatching(models.Model):
-    datetime = models.TimeField(db_column='dateTime')  # Field name made lowercase.
+    datetime = models.DateTimeField(db_column='dateTime')  # Field name made lowercase.
     meetingurl = models.CharField(db_column='meetingUrl', blank=True, null=True)  # Field name made lowercase.
     matchingid = models.UUIDField(db_column='matchingId', primary_key=True)  # Field name made lowercase.
     hostid = models.ForeignKey('User', models.DO_NOTHING, db_column='hostId')  # Field name made lowercase.
@@ -89,7 +89,7 @@ class Paymentmethod(models.Model):
 class Program(models.Model):
     title = models.CharField()
     datetime = models.TimeField(db_column='dateTime', blank=True, null=True)  # Field name made lowercase.
-    createdat = models.DateTimeField(db_column='createdAt', blank=True, null=True)  # Field name made lowercase.
+    createdate = models.DateTimeField(db_column='createdAt', blank=True, null=True)  # Field name made lowercase.
     location = models.CharField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     cost = models.FloatField(blank=True, null=True)
@@ -106,7 +106,7 @@ class Programparticipants(models.Model):
     programid = models.ForeignKey(Program, models.DO_NOTHING, db_column='programId')  # Field name made lowercase.
     hostid = models.ForeignKey('User', models.DO_NOTHING, db_column='hostId')  # Field name made lowercase.
     guestid = models.ForeignKey('User', models.DO_NOTHING, db_column='guestId', related_name='programparticipants_guestid_set', blank=True, null=True)  # Field name made lowercase.
-
+    dateofparticipant = models.DateTimeField(blank=True, null=True)
     class Meta:
         managed = True
         db_table = 'ProgramParticipants'
