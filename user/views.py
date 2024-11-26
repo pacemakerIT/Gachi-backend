@@ -72,18 +72,26 @@ def signup(request):
 
 @api_view(['POST'])
 def login(request):
+    if not request.data.get('email'):
+        return JsonResponse({'error': '이메일을 입력해주세요.'}, status=400)
+    
+    if not request.data.get('password'):
+        return JsonResponse({'error': '비밀번호를 입력해주세요.'}, status=400)
+
     email = request.data.get('email')
     password = request.data.get('password').encode('utf-8')
 
     try:
-        user = supabase.table('User').select('*').eq('email', email).execute().data[0]
-        
-        stored_password = user['password'].encode('utf-8')
-        print("stord pw:", stored_password)
+        user_data = supabase.table('User').select('*').eq('email', email).execute()
 
+        if not user_data.data:
+            return JsonResponse({'error': '사용자를 찾을 수 없습니다.'}, status=400)
+        
+        user = user_data.data[0]
+        stored_password = user['password'].encode('utf-8')
 
         if not bcrypt.checkpw(password, stored_password):
-            return JsonResponse({'error': '이메일 또는 비밀번호가 잘못되었습니다.'}, status=401)
+            return JsonResponse({'error': '비밀번호가 잘못되었습니다.'}, status=400)
 
         # Create JWT Token
         payload = {
@@ -109,19 +117,74 @@ def login(request):
             algorithm='HS256'
         )
         
-        return JsonResponse({
-            'access_token': access_token,
-            'refresh_token': refresh_token,
+        response = JsonResponse({
+            'message': 'Successfully logged in',
             'user': {
                 'id': user.get('id'),
                 'email': email
             }
         }, status=200)
         
+        # Set HTTP-only cookies
+        response.set_cookie(
+            'access_token',
+            access_token,
+            max_age=86400,  # 1 day in seconds
+            httponly=True,
+            samesite='Lax',
+            secure=True  # Set to True in production with HTTPS
+        )
+        
+        response.set_cookie(
+            'refresh_token',
+            refresh_token,
+            max_age=604800,  # 7 days in seconds
+            httponly=True,
+            samesite='Lax',
+            secure=True  # Set to True in production with HTTPS
+        )
+        
+        return response
+    
     except Exception as e:
         print(f"Login error: {str(e)}")
         return JsonResponse({
             "error": "Server error",
             "details": str(e)
         }, status=500)
+
+@api_view(['POST'])
+def logout(request):
+    response = JsonResponse({'message': 'Successfully logged out'})
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    return response
+
+
+@api_view(['GET'])
+def verify_token(request):
+    access_token = request.COOKIES.get('access_token')
     
+    if not access_token:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Verify the token
+        payload = jwt.decode(
+            access_token,
+            JWT_SECRET_KEY,
+            algorithms=['HS256']
+        )        
+
+        return JsonResponse({
+            'verified': True,
+            'user': {
+                'id': payload.get('user_id'),
+                'email': payload.get('email')
+            }
+        })
+        
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token expired'}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({'error': 'Invalid token'}, status=401)

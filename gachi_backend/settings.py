@@ -89,6 +89,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     'allauth.account.middleware.AccountMiddleware',
+    'user.middleware.JWTAuthenticationMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -100,6 +101,12 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 LOGIN_REDIRECT_URL = 'http://localhost:3000'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -199,20 +206,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# can be deleted
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'allauth': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}

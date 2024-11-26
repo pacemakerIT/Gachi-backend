@@ -17,7 +17,7 @@ def landing_page_supabase_connection(request):
     programs = response_program.data
 
     # Get Mentors data from User table
-    response_mentor = supabase.table('User').select('*, Industry!inner(*)').eq('userTypeId', '74ae0cb7-e4bf-472e-a8a3-e94d895028e5').execute()
+    response_mentor = supabase.table('User').select('*, Industry!inner(*)').eq('userTypeId', '55181db3-e2e6-4561-9a4e-0387f6df0782').execute()
     mentors = response_mentor.data
 
     flattened_mentors = []
