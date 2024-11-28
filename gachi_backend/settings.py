@@ -14,6 +14,9 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# Import dj-database-url at the beginning of the file.
+import dj_database_url
+
 # Load .env file
 load_dotenv()
 
@@ -40,6 +43,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS = ['gachi-backend.onrender.com']
 ALLOWED_HOSTS = ['*']  # 로컬 개발 중에는 '*', 배포 환경에서는 실제 도메인 추가
 ACCOUNT_UNIQUE_EMAIL = True  # 이메일이 중복되지 않도록 설정
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
@@ -57,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     "rest_framework",
     "corsheaders",
+    "gachi_backend"
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -134,6 +139,9 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 #Allowing CORS requests from all origins is recommended only in a development environment.
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Next.js 프론트엔드의 URL
+]
 
 ROOT_URLCONF = "gachi_backend.urls"
 
@@ -159,13 +167,19 @@ WSGI_APPLICATION = "gachi_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.environ.get("DATABASE_NAME"),
+#         "USER": os.environ.get("DATABASE_USER"),
+#         "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+#         "HOST": os.environ.get("DATABASE_HOST"),
+#         "PORT": os.environ.get("DATABASE_PORT", "5432"),
+#     }
+# }
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -201,6 +215,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
