@@ -24,7 +24,6 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 @api_view(['GET'])
 def verify_admin(request):
     access_token = request.COOKIES.get('access_token')
-    
     if not access_token:
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
@@ -35,9 +34,9 @@ def verify_admin(request):
             JWT_SECRET_KEY,
             algorithms=['HS256']
         )   
+        user_email = payload.get('email')
         if not user_email:
             return JsonResponse({'error': 'Invalid token payload'}, status=401)
-        user_email = payload.get('email')
 
         response = supabase.table('User').select('*').eq('email', user_email).single().execute()
         if not response:
