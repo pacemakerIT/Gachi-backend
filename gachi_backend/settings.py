@@ -60,8 +60,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'django.contrib.sites',
     "rest_framework",
+    'rest_framework_simplejwt',
     "corsheaders",
-    "gachi_backend"
+    "gachi_backend",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -107,11 +108,12 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = 'http://localhost:3000'
 
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
-
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -136,12 +138,6 @@ SITE_ID = 1
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-
-#Allowing CORS requests from all origins is recommended only in a development environment.
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Next.js 프론트엔드의 URL
-]
 
 ROOT_URLCONF = "gachi_backend.urls"
 

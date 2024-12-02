@@ -1,14 +1,60 @@
 # views.py
-from django.shortcuts import render
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from gachi_backend.models import User, Industry, Mentormatching, Feedback, Program, Programtopic, Programparticipants, Topic
-from django.db.models import Count, F,Sum
-from uuid import UUID
+import jwt
 import calendar
+from django.conf import settings
+from django.http import JsonResponse
+from django.db.models import Count, F,Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
+from rest_framework.decorators import api_view
+from supabase import Client, create_client
+from uuid import UUID
+from datetime import datetime, timedelta
 from collections import defaultdict
+from gachi_backend.models import User, Industry, Mentormatching, Feedback, Program, Programtopic, Programparticipants, Topic
+
+SUPABASE_URL = settings.SUPABASE_URL
+SUPABASE_API_KEY = settings.SUPABASE_API_KEY
+
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
+
+# Initialize Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
+
+@api_view(['GET'])
+def verify_admin(request):
+    access_token = request.COOKIES.get('access_token')
+    
+    if not access_token:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Verify the token
+        payload = jwt.decode(
+            access_token,
+            JWT_SECRET_KEY,
+            algorithms=['HS256']
+        )   
+        if not user_email:
+            return JsonResponse({'error': 'Invalid token payload'}, status=401)
+        user_email = payload.get('email')
+
+        response = supabase.table('User').select('*').eq('email', user_email).single().execute()
+        if not response:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        user_data = response.data
+        if user_data['userTypeId'] == '8c1355cf-b334-40fd-9076-890c52be159b':
+            return JsonResponse({'message': 'Authorized'}, status=200)
+        else:
+            return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def dashboard_api_design(request):
     # 1. 이번 주 신규 회원 수

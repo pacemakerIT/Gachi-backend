@@ -1,11 +1,11 @@
 import bcrypt
 import jwt
 from django.conf import settings
-from supabase import create_client, Client
 from django.http import JsonResponse
+from django.http import JsonResponse
+from django.utils import timezone
 from rest_framework.decorators import api_view
-from django.shortcuts import render
-from django.http import JsonResponse
+from supabase import create_client, Client
 from datetime import datetime, timedelta
 
 # Use the settings to get the Supabase configuration
@@ -47,7 +47,9 @@ def signup(request):
                 "firstName": data['firstName'],
                 "lastName": data['lastName'],
                 "email": data['email'],
-                "password": hashed_password
+                "password": hashed_password,
+                "userTypeId": '292d2be9-5ce5-4a7b-b5e2-cd412bed268b', # set user as mentee for default
+                # "dateofregistration": timezone.now(),
             }
             
             response = supabase.table('User').insert(user_data).execute()
@@ -174,8 +176,7 @@ def verify_token(request):
             access_token,
             JWT_SECRET_KEY,
             algorithms=['HS256']
-        )        
-
+        )   
         return JsonResponse({
             'verified': True,
             'user': {
@@ -183,8 +184,10 @@ def verify_token(request):
                 'email': payload.get('email')
             }
         })
-        
+    
     except jwt.ExpiredSignatureError:
-        return JsonResponse({'error': 'Token expired'}, status=401)
+        return JsonResponse({'error': 'Token has expired'}, status=401)
     except jwt.InvalidTokenError:
         return JsonResponse({'error': 'Invalid token'}, status=401)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
