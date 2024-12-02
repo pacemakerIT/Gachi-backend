@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Import dj-database-url at the beginning of the file.
 import dj_database_url
@@ -75,8 +76,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-from datetime import timedelta
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -95,7 +94,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     'allauth.account.middleware.AccountMiddleware',
-    'user.middleware.JWTAuthenticationMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
