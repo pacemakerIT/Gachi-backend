@@ -123,7 +123,8 @@ def login(request):
             'message': 'Successfully logged in',
             'user': {
                 'id': user.get('id'),
-                'email': email
+                'email': email,
+                'userTypeId': user.get('userTypeId'),
             }
         }, status=200)
         
