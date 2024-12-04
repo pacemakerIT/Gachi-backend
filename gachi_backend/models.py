@@ -31,7 +31,7 @@ class Feedback(models.Model):
 
 
 class Industry(models.Model):
-    title = models.CharField()
+    title = models.CharField(max_length=50)
     industryid = models.UUIDField(db_column='industryId', primary_key=True)  # Field name made lowercase.
 
     class Meta:
@@ -41,7 +41,7 @@ class Industry(models.Model):
 
 class Mentormatching(models.Model):
     datetime = models.DateTimeField(db_column='dateTime')  # Field name made lowercase.
-    meetingurl = models.CharField(db_column='meetingUrl', blank=True, null=True)  # Field name made lowercase.
+    meetingurl = models.CharField(max_length=100, db_column='meetingUrl', blank=True, null=True)  # Field name made lowercase.
     matchingid = models.UUIDField(db_column='matchingId', primary_key=True)  # Field name made lowercase.
     hostid = models.ForeignKey('User', models.DO_NOTHING, db_column='hostId')  # Field name made lowercase.
     guestid = models.ForeignKey('User', models.DO_NOTHING, db_column='guestId', related_name='mentormatching_guestid_set')  # Field name made lowercase.
@@ -78,7 +78,7 @@ class Payment(models.Model):
 
 
 class Paymentmethod(models.Model):
-    paymentmethod = models.CharField(db_column='paymentMethod')  # Field name made lowercase.
+    paymentmethod = models.CharField(max_length=20, db_column='paymentMethod')  # Field name made lowercase.
     paymentmethodid = models.UUIDField(db_column='paymentMethodId', primary_key=True)  # Field name made lowercase.
 
     class Meta:
@@ -87,10 +87,10 @@ class Paymentmethod(models.Model):
 
 
 class Program(models.Model):
-    title = models.CharField()
+    title = models.CharField(max_length=20)
     datetime = models.TimeField(db_column='dateTime', blank=True, null=True)  # Field name made lowercase.
     createdate = models.DateTimeField(db_column='createdAt', blank=True, null=True)  # Field name made lowercase.
-    location = models.CharField(blank=True, null=True)
+    location = models.CharField(max_length=30, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     cost = models.FloatField(blank=True, null=True)
     programid = models.UUIDField(db_column='programId', primary_key=True)  # Field name made lowercase.
@@ -154,11 +154,11 @@ class Topic(models.Model):
 
 
 class User(models.Model):
-    firstname = models.CharField(db_column='firstName')  # Field name made lowercase.
-    lastname = models.CharField(db_column='lastName')  # Field name made lowercase.
-    email = models.CharField()
-    password = models.CharField(blank=True, null=True)
-    careergoal = models.CharField(db_column='careerGoal', blank=True, null=True)  # Field name made lowercase.
+    firstname = models.CharField(max_length=10, db_column='firstName')  # Field name made lowercase.
+    lastname = models.CharField(max_length=10, db_column='lastName')  # Field name made lowercase.
+    email = models.CharField(max_length=30)
+    password = models.CharField(max_length=20, blank=True, null=True)
+    careergoal = models.CharField(max_length=20, db_column='careerGoal', blank=True, null=True)  # Field name made lowercase.
     photourl = models.TextField(db_column='photoUrl', blank=True, null=True)  # Field name made lowercase.
     linkedinurl = models.TextField(db_column='linkedInUrl', blank=True, null=True)  # Field name made lowercase.
     userid = models.UUIDField(db_column='userId', primary_key=True)  # Field name made lowercase.
@@ -182,15 +182,9 @@ class Usertopic(models.Model):
 
 
 class Usertype(models.Model):
-    typename = models.CharField(db_column='typeName')  # Field name made lowercase.
+    typename = models.CharField(max_length=10, db_column='typeName')  # Field name made lowercase.
     usertypeid = models.UUIDField(db_column='userTypeId', primary_key=True)  # Field name made lowercase.
 
     class Meta:
         managed = True
         db_table = 'UserType'
-
-
-
-
-
-
