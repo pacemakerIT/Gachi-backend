@@ -135,6 +135,7 @@ def login(request):
             max_age=86400,  # 1 day in seconds
             httponly=True,
             samesite='Lax',
+            domain='localhost',
             secure=True  # Set to True in production with HTTPS
         )
         
@@ -144,6 +145,7 @@ def login(request):
             max_age=604800,  # 7 days in seconds
             httponly=True,
             samesite='Lax',
+            domain='localhost',
             secure=True  # Set to True in production with HTTPS
         )
         
