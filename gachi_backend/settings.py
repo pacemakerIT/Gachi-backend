@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from datetime import timedelta
 
 # Import dj-database-url at the beginning of the file.
 import dj_database_url
@@ -24,12 +23,6 @@ load_dotenv()
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
-
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY")
-
-GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET=os.getenv("GOOGLE_CLIENT_SECRET")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,11 +37,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['gachi-backend.onrender.com']
-ALLOWED_HOSTS = ['*']  # 로컬 개발 중에는 '*', 배포 환경에서는 실제 도메인 추가
-ACCOUNT_UNIQUE_EMAIL = True  # 이메일이 중복되지 않도록 설정
-ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-SOCIALACCOUNT_QUERY_EMAIL = True
+ALLOWED_HOSTS = ['gachi-backend.onrender.com']
+
 
 # Application definition
 
@@ -59,30 +49,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'django.contrib.sites',
     "rest_framework",
-    'rest_framework_simplejwt',
     "corsheaders",
-    "gachi_backend",
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+    "gachi_backend"
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -93,49 +63,13 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
-AUTHENTICATION_BACKENDS = [
-    # Needed to login by username in Django admin, regardless of `allauth`
-    'django.contrib.auth.backends.ModelBackend',
-
-    # `allauth` specific authentication methods, such as login by email
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
-LOGIN_REDIRECT_URL = 'http://localhost:3000'
-
+#Allowing CORS requests from all origins is recommended only in a development environment.
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:3000",  # Next.js 프론트엔드의 URL
 ]
-CORS_ALLOW_CREDENTIALS = True
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret': GOOGLE_CLIENT_SECRET,
-            'key': ''
-        },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'OAUTH_PKCE_ENABLED': True,
-    }
-}
-
-# Django allauth config
-SITE_ID = 1
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
 ROOT_URLCONF = "gachi_backend.urls"
 
@@ -161,19 +95,21 @@ WSGI_APPLICATION = "gachi_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.environ.get("DATABASE_NAME"),
-#         "USER": os.environ.get("DATABASE_USER"),
-#         "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
-#         "HOST": os.environ.get("DATABASE_HOST"),
-#         "PORT": os.environ.get("DATABASE_PORT", "5432"),
-#     }
-# }
-DATABASES = {
-    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
+if os.environ.get("DJANGO_ENV") == "production":
+    DATABASES = {
+        "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
+    }
+else:  # Default to local development settings
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DATABASE_NAME"),
+            "USER": os.environ.get("DATABASE_USER"),
+            "PASSWORD": os.environ.get("DATABASE_PASSWORD"),
+            "HOST": os.environ.get("DATABASE_HOST", "localhost"),
+            "PORT": os.environ.get("DATABASE_PORT", "5432"),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -192,6 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
