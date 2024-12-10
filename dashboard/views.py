@@ -8,6 +8,7 @@ from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from supabase import Client, create_client
+from postgrest import APIError
 from uuid import UUID
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -328,3 +329,17 @@ def dashboard_api_design(request):
     }
 
     return JsonResponse(data) 
+
+def admin_program_api(request):
+    try:
+        response = supabase.table('Program')\
+            .select('title, cost, programId, thumbnailUrl, status')\
+            .execute()
+
+        return JsonResponse({"data": response.data}, status=200)
+
+    except APIError as api_err:
+        return JsonResponse({"error": f"API Error: {str(api_err)}"}, status=500)
+
+    except Exception as ex:
+        return JsonResponse({"error": "An unexpected error occurred.", "details": str(ex)}, status=500)
