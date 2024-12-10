@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.db.models import Count, F,Sum
 from django.db.models.functions import TruncMonth
+from postgrest import APIError
 from django.utils import timezone
 from rest_framework.decorators import api_view
 from supabase import Client, create_client
@@ -328,3 +329,34 @@ def dashboard_api_design(request):
     }
 
     return JsonResponse(data) 
+
+def admin_user_api(request):
+    try:
+        response = supabase.table('User') \
+            .select('firstName, lastName, email, linkedInUrl, userId, Industry!inner(title)') \
+            .execute()
+
+        users = []
+        for user in response.data:
+            # userId = user.pop('userId', None)
+            firstName = user.pop('firstName', 'None') or 'None'
+            lastName = user.pop('lastName', 'None') or 'None'
+            email = user.pop('email', 'None') or 'None'
+            linkedInUrl = user.pop('linkedInUrl', 'None') or 'None'
+            industry_data = user.pop('Industry', {})
+            industryTitle = industry_data.get('title', 'None') or 'None'
+            users.append({
+                **user,
+                # 'id': userId,
+                'name': firstName + ' ' + lastName,
+                'email': email,
+                'linkedInUrl': linkedInUrl,
+                'industryTitle': industryTitle,
+            })
+        return JsonResponse({"data": users}, status=200)
+
+    except APIError as api_err:
+        return JsonResponse({"error": f"API Error: {str(api_err)}"}, status=500)
+
+    except Exception as ex:
+        return JsonResponse({"error": "An unexpected error occurred.", "details": str(ex)}, status=500)
