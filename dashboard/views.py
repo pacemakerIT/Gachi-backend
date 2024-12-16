@@ -335,16 +335,15 @@ def dashboard_api_design(request):
 def admin_user_api(request):
     try:
         response = supabase.table('User') \
-            .select('firstName, lastName, email, linkedInUrl, userId, userTypeId, UserType(typeName), memo, Industry(title)') \
+            .select('firstName, lastName, email, linkedInUrl, userId, userTypeId, memo, region, Industry(title)') \
             .execute()
         users = []
         for user in response.data:
             user_id = user.get('userId', 'None')
             linkedInUrl = user.pop('linkedInUrl', 'None') or 'None'
+            region = user.pop('region', 'None') or 'None'
             industry_data = user.pop('Industry', {})
             industryTitle = industry_data.get('title', 'None') if industry_data else 'None'
-            user_type_data = user.pop('UserType', {})
-            user_type = user_type_data.get('typeName', 'None') if user_type_data else 'None'
 
             match_response = supabase.table('MentorMatching').select('*')\
                 .or_(f'hostId.eq.{user_id},guestId.eq.{user_id}').execute()
@@ -354,9 +353,9 @@ def admin_user_api(request):
             users.append({
                 **user,
                 'linkedInUrl': linkedInUrl,
+                'region': region,
                 'location': 'None',
                 'industryTitle': industryTitle,
-                'userType': user_type,
                 'matchStatus': matchStatus,
             })
         return JsonResponse({"data": users}, status=200)
