@@ -1,14 +1,62 @@
 # views.py
-from django.shortcuts import render
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from gachi_backend.models import User, Industry, Mentormatching, Feedback, Program, Programtopic, Programparticipants, Topic
-from django.db.models import Count, F,Sum
-from uuid import UUID
+import json
+import jwt
 import calendar
+from django.conf import settings
+from django.http import JsonResponse
+from django.db.models import Count, F,Sum
 from django.db.models.functions import TruncMonth
+from postgrest import APIError
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from rest_framework.decorators import api_view
+from supabase import Client, create_client
+from uuid import UUID
+from datetime import datetime, timedelta
 from collections import defaultdict
+from gachi_backend.models import User, Industry, Mentormatching, Feedback, Program, Programtopic, Programparticipants, Topic
+
+SUPABASE_URL = settings.SUPABASE_URL
+SUPABASE_API_KEY = settings.SUPABASE_API_KEY
+
+JWT_SECRET_KEY = settings.JWT_SECRET_KEY
+
+# Initialize Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_API_KEY)
+
+@api_view(['GET'])
+def verify_admin(request):
+    access_token = request.COOKIES.get('access_token')
+    if not access_token:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Verify the token
+        payload = jwt.decode(
+            access_token,
+            JWT_SECRET_KEY,
+            algorithms=['HS256']
+        )   
+        user_email = payload.get('email')
+        if not user_email:
+            return JsonResponse({'error': 'Invalid token payload'}, status=401)
+
+        response = supabase.table('User').select('*').eq('email', user_email).single().execute()
+        if not response:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        user_data = response.data
+        if user_data['userTypeId'] == '8c1355cf-b334-40fd-9076-890c52be159b':
+            return JsonResponse({'message': 'Authorized'}, status=200)
+        else:
+            return JsonResponse({'message': 'Forbidden'}, status=403)
+
+    except jwt.ExpiredSignatureError:
+        return JsonResponse({'error': 'Token has expired'}, status=401)
+    except jwt.InvalidTokenError:
+        return JsonResponse({'error': 'Invalid token'}, status=401)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 def dashboard_api_design(request):
     # 1. 이번 주 신규 회원 수
@@ -283,3 +331,128 @@ def dashboard_api_design(request):
     }
 
     return JsonResponse(data) 
+
+def admin_user_api(request):
+    try:
+        response = supabase.table('User') \
+            .select('firstName, lastName, email, linkedInUrl, userId, userTypeId, memo, region, Industry(title)') \
+            .execute()
+        users = []
+        for user in response.data:
+            user_id = user.get('userId', 'None')
+            linkedInUrl = user.pop('linkedInUrl', 'None') or 'None'
+            region = user.pop('region', 'None') or 'None'
+            industry_data = user.pop('Industry', {})
+            industryTitle = industry_data.get('title', 'None') if industry_data else 'None'
+
+            match_response = supabase.table('MentorMatching').select('*')\
+                .or_(f'hostId.eq.{user_id},guestId.eq.{user_id}').execute()
+            if match_response.data: matchStatus = 'Matched'
+            else: matchStatus = 'Unmatched'
+
+            users.append({
+                **user,
+                'linkedInUrl': linkedInUrl,
+                'region': region,
+                'location': 'None',
+                'industryTitle': industryTitle,
+                'matchStatus': matchStatus,
+            })
+        return JsonResponse({"data": users}, status=200)
+
+    except APIError as api_err:
+        return JsonResponse({"error": f"API Error: {str(api_err)}"}, status=500)
+
+    except Exception as ex:
+        return JsonResponse({"error": "An unexpected error occurred.", "details": str(ex)}, status=500)
+
+@csrf_exempt
+def edit_user(request):
+    if request.method == 'PUT':
+        user_id = request.GET.get('user_id')
+        body = json.loads(request.body)
+        
+        try:
+            # Get industry id to update user in database
+            industry_title = body.get('industryTitle')
+            industry_response = supabase.table('Industry').select('industryId').eq('title', industry_title).execute()
+            if industry_response.data and len(industry_response.data) > 0:
+                industry_id = industry_response.data[0]['industryId']
+                
+            response = supabase.table('User').update({
+                'firstName': body.get('firstName'),
+                'lastName': body.get('lastName'),
+                'email': body.get('email'),
+                'linkedInUrl': body.get('linkedInUrl'),
+                # 'region': body.get('region'),
+                'industryId': industry_id,
+            }).eq('userId', user_id).execute()
+
+            if response.data:
+                return JsonResponse({"message": "User successfully updated."}, status=200)
+            else:
+                return JsonResponse({"error": "Failed to update user from Supabase."}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+@csrf_exempt
+def delete_user(request):
+    if request.method == 'DELETE':
+        user_id = request.GET.get('user_id')
+        try:
+            print('userid', user_id)
+            response = supabase.table('User').delete().eq('userId', user_id).execute()
+            print('respons', response)
+            if response.data:
+                return JsonResponse({"message": "User successfully deleted."}, status=200)
+            else:
+                return JsonResponse({"error": "Failed to delete user from Supabase."}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+@csrf_exempt
+def edit_user_type(request):
+    if request.method == 'PUT':
+        user_id = request.GET.get('user_id')
+        body = json.loads(request.body)
+        
+        try:
+            if (body == '멘토'):
+                userTypeId = '55181db3-e2e6-4561-9a4e-0387f6df0782'
+            elif (body == '멘티'):
+                userTypeId = '292d2be9-5ce5-4a7b-b5e2-cd412bed268b'
+
+            response = supabase.table('User').update({
+                'userTypeId': userTypeId,
+            }).eq('userId', user_id).execute()
+
+            if response.data:
+                return JsonResponse({"message": "User successfully updated."}, status=200)
+            else:
+                return JsonResponse({"error": "Failed to update user from Supabase."}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+
+@csrf_exempt
+def edit_memo(request):
+    if request.method == 'PUT':
+        user_id = request.GET.get('user_id')
+        body = json.loads(request.body)
+
+        print('body', body)        
+        try:
+            response = supabase.table('User').update({
+                'memo': body,
+            }).eq('userId', user_id).execute()
+
+            if response.data:
+                return JsonResponse({"message": "Memo successfully updated."}, status=200)
+            else:
+                return JsonResponse({"error": "Failed to update memo from Supabase."}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)

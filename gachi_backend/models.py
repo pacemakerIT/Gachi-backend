@@ -166,6 +166,8 @@ class User(models.Model):
     usertypeid = models.ForeignKey('Usertype', models.DO_NOTHING, db_column='userTypeId', blank=True, null=True)  # Field name made lowercase.
     memo = models.TextField(blank=True, null=True)
     dateofregistration = models.DateTimeField(blank=True, null=True)
+    phone =  models.CharField(max_length=20, blank=True, null=True)
+    region = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         managed = True
